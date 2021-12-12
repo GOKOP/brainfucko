@@ -1,7 +1,7 @@
 #include "stack.h"
 #include <stdlib.h>
 
-void stack_push(stack_el** top, size_t val) {
+void stack_push(stack_el** top, char* val) {
 	stack_el* new = malloc(sizeof(stack_el));
 	new->val = val;
 	new->next = *top;

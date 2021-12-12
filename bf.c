@@ -46,6 +46,8 @@ int main(int argc, char** argv) {
 	char* prog_ptr = program;
 	uchar* mem_ptr = memory;
 
+	stack_el* loops = NULL;
+
 	while(prog_ptr - program < bytes_read) {
 		switch(*prog_ptr) {
 			case '>': ++mem_ptr; break;
@@ -54,6 +56,17 @@ int main(int argc, char** argv) {
 			case '-': --(*mem_ptr); break;
 			case '.': putchar(*mem_ptr); break;
 			case ',': *mem_ptr = getchar(); break;
+			case '[': stack_push(&loops, prog_ptr); break;
+			case ']':
+				if(!loops) {
+					printf("ERROR: Bad syntax: ']' without a matching '['\n");
+					exit(1);
+				} else if(*mem_ptr) {
+					prog_ptr = loops->val;
+				} else {
+					stack_pop(&loops);
+				}
+				break;
 		}
 		++prog_ptr;
 	}
