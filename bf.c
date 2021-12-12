@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "stack.h"
 
 #define READ_CHUNK 100
+
+typedef unsigned char uchar;
 
 // size contains the size of the written buffer, without bytes allocated but not written
 char* load_program(char* fname, size_t* size) {
@@ -31,13 +34,27 @@ int main(int argc, char** argv) {
 	}
 
 	size_t bytes_read;
-	char* prog = load_program(argv[1], &bytes_read);
-	if(prog == NULL) printf("dupa\n");
-	else {
-		printf("read bytes: %lu\n", bytes_read);
-		for(size_t i=0; i<bytes_read; ++i) {
-			putchar(prog[i]);
+	char* program = load_program(argv[1], &bytes_read);
+	if(program == NULL) {
+		printf("Could not read %s\n", argv[1]);
+		exit(1);
+	}
+
+	uchar* memory = malloc(30000 * sizeof(uchar));
+	memset(memory, 0, 30000);
+
+	char* prog_ptr = program;
+	uchar* mem_ptr = memory;
+
+	while(prog_ptr - program < bytes_read) {
+		switch(*prog_ptr) {
+			case '>': ++mem_ptr; break;
+			case '<': --mem_ptr; break;
+			case '+': ++(*mem_ptr); break;
+			case '-': --(*mem_ptr); break;
+			case '.': putchar(*mem_ptr); break;
+			case ',': *mem_ptr = getchar(); break;
 		}
-		free(prog);
+		++prog_ptr;
 	}
 }
