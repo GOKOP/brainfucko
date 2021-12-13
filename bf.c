@@ -27,6 +27,14 @@ char* load_program(char* fname, size_t* size) {
 	return program;
 }
 
+void check_loop(stack_el** loops, char** prog_ptr, uchar current_mem) {
+	if(!(*loops)) {
+		printf("ERROR: Bad syntax: ']' without a matching '['\n");
+		exit(1);
+	} else if(current_mem) *prog_ptr = (*loops)->val;
+	else stack_pop(loops);
+}
+
 int main(int argc, char** argv) {
 	if(argc != 2) {
 		printf("Usage: %s <filename>\n", argv[0]);
@@ -57,16 +65,7 @@ int main(int argc, char** argv) {
 			case '.': putchar(*mem_ptr); break;
 			case ',': *mem_ptr = getchar(); break;
 			case '[': stack_push(&loops, prog_ptr); break;
-			case ']':
-				if(!loops) {
-					printf("ERROR: Bad syntax: ']' without a matching '['\n");
-					exit(1);
-				} else if(*mem_ptr) {
-					prog_ptr = loops->val;
-				} else {
-					stack_pop(&loops);
-				}
-				break;
+			case ']': check_loop(&loops, &prog_ptr, *mem_ptr); break;
 		}
 		++prog_ptr;
 	}
