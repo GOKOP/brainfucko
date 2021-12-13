@@ -9,14 +9,14 @@
 typedef unsigned char uchar;
 
 // size contains the size of the written buffer, without bytes allocated but not written
-char* load_program(char* fname, size_t* size) {
+char* load_program(char* fname, int* size) {
 	FILE* in = fopen(fname, "r");
 	if(!in) return NULL;
 
 	*size = READ_CHUNK;
 	char* program = malloc((*size) * sizeof(char));
 	if(!program) return NULL;
-	size_t offset = 0;
+	int offset = 0;
 	int bytes_read = 0;
 
 	while((bytes_read = fread(program + offset, 1, READ_CHUNK, in)) == READ_CHUNK) {
@@ -34,7 +34,7 @@ char* load_program(char* fname, size_t* size) {
 	return program;
 }
 
-void skip_loop(char* program_start, size_t program_size, char** ptr) {
+void skip_loop(char* program_start, int program_size, char** ptr) {
 	// move through the program until the end of the encountered loop
 	// which may contain other loops
 
@@ -70,7 +70,7 @@ void decr_ptr(uchar* beg, uchar** ptr) {
 	}
 }
 
-void process_program(char* program, size_t prog_size, uchar* memory, uchar** mem_ptr) {
+void process_program(char* program, int prog_size, uchar* memory, uchar** mem_ptr) {
 	stack_el* loops = NULL;
 	char* prog_ptr = program;
 
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	size_t bytes_read;
+	int bytes_read;
 	char* program = load_program(argv[1], &bytes_read);
 	if(program == NULL) {
 		printf("Could not load the program from %s\n", argv[1]);

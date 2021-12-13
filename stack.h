@@ -1,5 +1,3 @@
-#include <stddef.h>
-
 typedef struct stack_element {
 	char* val;
 	struct stack_element* next;
