@@ -87,12 +87,18 @@ int main(int argc, char** argv) {
 
 	while(prog_ptr - program < bytes_read) {
 		switch(*prog_ptr) {
-			case '>': incr_ptr(memory, &mem_ptr); break;
-			case '<': decr_ptr(memory, &mem_ptr); break;
-			case '+': ++(*mem_ptr); break;
-			case '-': --(*mem_ptr); break;
-			case '.': putchar(*mem_ptr); break;
-			case ',': *mem_ptr = getchar(); break;
+			case '>': 
+				incr_ptr(memory, &mem_ptr); break;
+			case '<': 
+				decr_ptr(memory, &mem_ptr); break;
+			case '+': 
+				++(*mem_ptr); break;
+			case '-': 
+				--(*mem_ptr); break;
+			case '.': 
+				putchar(*mem_ptr); break;
+			case ',': 
+				*mem_ptr = getchar(); break;
 			case '[':
 				if(*mem_ptr) stack_push(&loops, prog_ptr);
 				else skip_loop(program, bytes_read, &prog_ptr);
@@ -103,6 +109,8 @@ int main(int argc, char** argv) {
 					exit(1);
 				} else if(*mem_ptr) prog_ptr = loops->val;
 				else stack_pop(&loops);
+				break;
+			default: break;
 		}
 		++prog_ptr;
 	}
