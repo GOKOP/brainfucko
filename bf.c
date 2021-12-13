@@ -4,6 +4,7 @@
 #include "stack.h"
 
 #define READ_CHUNK 100
+#define MEMSIZE 30000
 
 typedef unsigned char uchar;
 
@@ -35,6 +36,22 @@ void check_loop(stack_el** loops, char** prog_ptr, uchar current_mem) {
 	else stack_pop(loops);
 }
 
+void incr_ptr(uchar* beg, uchar** ptr) {
+	++(*ptr);
+	if(*ptr >= beg + MEMSIZE) {
+		printf("ERROR: Moved past allowed memory\n");
+		exit(1);
+	}
+}
+
+void decr_ptr(uchar* beg, uchar** ptr) {
+	--(*ptr);
+	if(*ptr < beg) {
+		printf("ERROR: Moved past allowed memory\n");
+		exit(1);
+	}
+}
+
 int main(int argc, char** argv) {
 	if(argc != 2) {
 		printf("Usage: %s <filename>\n", argv[0]);
@@ -48,8 +65,8 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	uchar* memory = malloc(30000 * sizeof(uchar));
-	memset(memory, 0, 30000);
+	uchar* memory = malloc(MEMSIZE * sizeof(uchar));
+	memset(memory, 0, MEMSIZE);
 
 	char* prog_ptr = program;
 	uchar* mem_ptr = memory;
@@ -58,8 +75,8 @@ int main(int argc, char** argv) {
 
 	while(prog_ptr - program < bytes_read) {
 		switch(*prog_ptr) {
-			case '>': ++mem_ptr; break;
-			case '<': --mem_ptr; break;
+			case '>': incr_ptr(memory, &mem_ptr); break;
+			case '<': decr_ptr(memory, &mem_ptr); break;
 			case '+': ++(*mem_ptr); break;
 			case '-': --(*mem_ptr); break;
 			case '.': putchar(*mem_ptr); break;
