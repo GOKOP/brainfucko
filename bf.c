@@ -41,7 +41,7 @@ void skip_loop(char* program_start, size_t program_size, char** ptr) {
 
 	if(loop_cnt > 0) {
 		printf("ERROR: Bad syntax: '[' without a matching ']'\n");
-		exit(1);
+		exit(2);
 	}
 
 	--(*ptr); // the loop above moves it past the ']'
@@ -52,7 +52,7 @@ void incr_ptr(uchar* beg, uchar** ptr) {
 	++(*ptr);
 	if(*ptr >= beg + MEMSIZE) {
 		printf("ERROR: Moved past allowed memory\n");
-		exit(1);
+		exit(3);
 	}
 }
 
@@ -60,7 +60,7 @@ void decr_ptr(uchar* beg, uchar** ptr) {
 	--(*ptr);
 	if(*ptr < beg) {
 		printf("ERROR: Moved past allowed memory\n");
-		exit(1);
+		exit(3);
 	}
 }
 
@@ -89,7 +89,7 @@ void process_program(char* program, size_t prog_size, uchar* memory, uchar** mem
 			case ']':
 				if(!loops) {
 					printf("ERROR: Bad Syntax: ']' without matching '['\n");
-					exit(1);
+					exit(2);
 				} else if(**mem_ptr) prog_ptr = loops->val;
 				else stack_pop(&loops);
 				break;
@@ -117,4 +117,6 @@ int main(int argc, char** argv) {
 
 	uchar* mem_ptr = memory;
 	process_program(program, bytes_read, memory, &mem_ptr);
+
+	return 0;
 }
