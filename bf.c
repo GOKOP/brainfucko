@@ -64,6 +64,41 @@ void decr_ptr(uchar* beg, uchar** ptr) {
 	}
 }
 
+void process_program(char* program, size_t prog_size, uchar* memory, uchar** mem_ptr) {
+	stack_el* loops = NULL;
+	char* prog_ptr = program;
+
+	while(prog_ptr - program < prog_size) {
+		switch(*prog_ptr) {
+			case '>': 
+				incr_ptr(memory, mem_ptr); break;
+			case '<': 
+				decr_ptr(memory, mem_ptr); break;
+			case '+': 
+				++(**mem_ptr); break;
+			case '-': 
+				--(**mem_ptr); break;
+			case '.': 
+				putchar(**mem_ptr); break;
+			case ',': 
+				**mem_ptr = getchar(); break;
+			case '[':
+				if(**mem_ptr) stack_push(&loops, prog_ptr);
+				else skip_loop(program, prog_size, &prog_ptr);
+				break;
+			case ']':
+				if(!loops) {
+					printf("ERROR: Bad Syntax: ']' without matching '['\n");
+					exit(1);
+				} else if(**mem_ptr) prog_ptr = loops->val;
+				else stack_pop(&loops);
+				break;
+			default: break;
+		}
+		++prog_ptr;
+	}
+}
+
 int main(int argc, char** argv) {
 	if(argc != 2) {
 		printf("Usage: %s <filename>\n", argv[0]);
@@ -80,38 +115,6 @@ int main(int argc, char** argv) {
 	uchar* memory = malloc(MEMSIZE * sizeof(uchar));
 	memset(memory, 0, MEMSIZE);
 
-	char* prog_ptr = program;
 	uchar* mem_ptr = memory;
-
-	stack_el* loops = NULL;
-
-	while(prog_ptr - program < bytes_read) {
-		switch(*prog_ptr) {
-			case '>': 
-				incr_ptr(memory, &mem_ptr); break;
-			case '<': 
-				decr_ptr(memory, &mem_ptr); break;
-			case '+': 
-				++(*mem_ptr); break;
-			case '-': 
-				--(*mem_ptr); break;
-			case '.': 
-				putchar(*mem_ptr); break;
-			case ',': 
-				*mem_ptr = getchar(); break;
-			case '[':
-				if(*mem_ptr) stack_push(&loops, prog_ptr);
-				else skip_loop(program, bytes_read, &prog_ptr);
-				break;
-			case ']':
-				if(!loops) {
-					printf("ERROR: Bad Syntax: ']' without matching '['\n");
-					exit(1);
-				} else if(*mem_ptr) prog_ptr = loops->val;
-				else stack_pop(&loops);
-				break;
-			default: break;
-		}
-		++prog_ptr;
-	}
+	process_program(program, bytes_read, memory, &mem_ptr);
 }
