@@ -15,13 +15,19 @@ char* load_program(char* fname, size_t* size) {
 
 	*size = READ_CHUNK;
 	char* program = malloc((*size) * sizeof(char));
+	if(!program) return NULL;
 	size_t offset = 0;
 	int bytes_read = 0;
 
 	while((bytes_read = fread(program + offset, 1, READ_CHUNK, in)) == READ_CHUNK) {
 		*size += READ_CHUNK;
 		offset += READ_CHUNK;
-		program = realloc(program, (*size) * sizeof(char));
+		char* new_block = realloc(program, (*size) * sizeof(char));
+		if(!new_block) {
+			free(program);
+			return NULL;
+		}
+		program = new_block;
 	}
 	*size -= (READ_CHUNK - bytes_read);
 
@@ -108,11 +114,15 @@ int main(int argc, char** argv) {
 	size_t bytes_read;
 	char* program = load_program(argv[1], &bytes_read);
 	if(program == NULL) {
-		printf("Could not read %s\n", argv[1]);
+		printf("Could not load the program from %s\n", argv[1]);
 		exit(1);
 	}
 
 	uchar* memory = malloc(MEMSIZE * sizeof(uchar));
+	if(!memory) {
+		printf("Can't allocate program memory\n");
+		exit(1);
+	}
 	memset(memory, 0, MEMSIZE);
 
 	uchar* mem_ptr = memory;
