@@ -28,12 +28,24 @@ char* load_program(char* fname, size_t* size) {
 	return program;
 }
 
-void check_loop(stack_el** loops, char** prog_ptr, uchar current_mem) {
-	if(!(*loops)) {
-		printf("ERROR: Bad syntax: ']' without a matching '['\n");
+void skip_loop(char* program_start, size_t program_size, char** ptr) {
+	// move through the program until the end of the encountered loop
+	// which may contain other loops
+
+	int loop_cnt = 0;
+	do {
+		if(**ptr == '[') ++loop_cnt;
+		if(**ptr == ']') --loop_cnt;
+		++(*ptr);
+	} while(*ptr - program_start < program_size && loop_cnt > 0);
+
+	if(loop_cnt > 0) {
+		printf("ERROR: Bad syntax: '[' without a matching ']'\n");
 		exit(1);
-	} else if(current_mem) *prog_ptr = (*loops)->val;
-	else stack_pop(loops);
+	}
+
+	--(*ptr); // the loop above moves it past the ']'
+	          // but outside this function it's moved further after switch
 }
 
 void incr_ptr(uchar* beg, uchar** ptr) {
@@ -81,8 +93,16 @@ int main(int argc, char** argv) {
 			case '-': --(*mem_ptr); break;
 			case '.': putchar(*mem_ptr); break;
 			case ',': *mem_ptr = getchar(); break;
-			case '[': stack_push(&loops, prog_ptr); break;
-			case ']': check_loop(&loops, &prog_ptr, *mem_ptr); break;
+			case '[':
+				if(*mem_ptr) stack_push(&loops, prog_ptr);
+				else skip_loop(program, bytes_read, &prog_ptr);
+				break;
+			case ']':
+				if(!loops) {
+					printf("ERROR: Bad Syntax: ']' without matching '['\n");
+					exit(1);
+				} else if(*mem_ptr) prog_ptr = loops->val;
+				else stack_pop(&loops);
 		}
 		++prog_ptr;
 	}
