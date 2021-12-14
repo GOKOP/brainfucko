@@ -8,33 +8,33 @@
 
 typedef unsigned char uchar;
 
-// size contains the size of the written buffer, without bytes allocated but not written
-char* load_program(char* fname, int* size) {
+char* load_program(char* fname) {
 	FILE* in = fopen(fname, "r");
 	if(!in) return NULL;
 
-	*size = READ_CHUNK;
-	char* program = malloc((*size) * sizeof(char));
+	int size = READ_CHUNK;
+	char* program = malloc(size * sizeof(char));
 	if(!program) return NULL;
 	int offset = 0;
 	int bytes_read = 0;
 
 	while((bytes_read = fread(program + offset, 1, READ_CHUNK, in)) == READ_CHUNK) {
-		*size += READ_CHUNK;
+		size += READ_CHUNK;
 		offset += READ_CHUNK;
-		char* new_block = realloc(program, (*size) * sizeof(char));
+		char* new_block = realloc(program, size * sizeof(char));
 		if(!new_block) {
 			free(program);
 			return NULL;
 		}
 		program = new_block;
 	}
-	*size -= (READ_CHUNK - bytes_read);
+	size -= (READ_CHUNK - bytes_read);
+	program[size] = 0;
 
 	return program;
 }
 
-void skip_loop(char* program_start, int program_size, char** ptr) {
+void skip_loop(char** ptr) {
 	// move through the program until the end of the encountered loop
 	// which may contain other loops
 
@@ -43,7 +43,7 @@ void skip_loop(char* program_start, int program_size, char** ptr) {
 		if(**ptr == '[') ++loop_cnt;
 		if(**ptr == ']') --loop_cnt;
 		++(*ptr);
-	} while(*ptr - program_start < program_size && loop_cnt > 0);
+	} while(**ptr && loop_cnt > 0);
 
 	if(loop_cnt > 0) {
 		printf("ERROR: Bad syntax: '[' without a matching ']'\n");
@@ -70,11 +70,11 @@ void decr_ptr(uchar* beg, uchar** ptr) {
 	}
 }
 
-void process_program(char* program, int prog_size, uchar* memory, uchar** mem_ptr) {
+void process_program(char* program, uchar* memory, uchar** mem_ptr) {
 	stack_el* loops = NULL;
 	char* prog_ptr = program;
 
-	while(prog_ptr - program < prog_size) {
+	while(*prog_ptr) {
 		switch(*prog_ptr) {
 			case '>': 
 				incr_ptr(memory, mem_ptr); break;
@@ -90,7 +90,7 @@ void process_program(char* program, int prog_size, uchar* memory, uchar** mem_pt
 				**mem_ptr = getchar(); break;
 			case '[':
 				if(**mem_ptr) stack_push(&loops, prog_ptr);
-				else skip_loop(program, prog_size, &prog_ptr);
+				else skip_loop(&prog_ptr);
 				break;
 			case ']':
 				if(!loops) {
@@ -106,8 +106,7 @@ void process_program(char* program, int prog_size, uchar* memory, uchar** mem_pt
 }
 
 void run_from_file(char* fname) {
-	int bytes_read;
-	char* program = load_program(fname, &bytes_read);
+	char* program = load_program(fname);
 	if(program == NULL) {
 		printf("Could not load the program from %s\n", fname);
 		exit(1);
@@ -121,7 +120,7 @@ void run_from_file(char* fname) {
 	memset(memory, 0, MEMSIZE);
 
 	uchar* mem_ptr = memory;
-	process_program(program, bytes_read, memory, &mem_ptr);
+	process_program(program, memory, &mem_ptr);
 }
 
 void repl() {
@@ -139,7 +138,7 @@ void repl() {
 	while(1) {
 		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
 		getline(&linebuf, &bufsize, stdin);
-		process_program(linebuf, strlen(linebuf), memory, &mem_ptr);
+		process_program(linebuf, memory, &mem_ptr);
 	}
 }
 
