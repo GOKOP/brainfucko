@@ -41,20 +41,18 @@ int skip_loop(char** ptr) {
 	// move through the program until the end of the encountered loop
 	// which may contain other loops
 
-	int loop_cnt = 0;
-	do {
+	int loop_cnt = 1;
+	while(**ptr && loop_cnt > 0) {
+		++(*ptr);
 		if(**ptr == '[') ++loop_cnt;
 		if(**ptr == ']') --loop_cnt;
-		++(*ptr);
-	} while(**ptr && loop_cnt > 0);
+	} 
 
 	if(loop_cnt > 0) {
 		printf("ERROR: Bad syntax: '[' without a matching ']'\n");
 		return 2;
 	}
 
-	--(*ptr); // the loop above moves it past the ']'
-	          // but outside this function it's moved further after switch
 	return 0;
 }
 
