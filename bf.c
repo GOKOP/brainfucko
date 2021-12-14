@@ -105,16 +105,11 @@ void process_program(char* program, int prog_size, uchar* memory, uchar** mem_pt
 	}
 }
 
-int main(int argc, char** argv) {
-	if(argc != 2) {
-		printf("Usage: %s <filename>\n", argv[0]);
-		exit(1);
-	}
-
+void run_from_file(char* fname) {
 	int bytes_read;
-	char* program = load_program(argv[1], &bytes_read);
+	char* program = load_program(fname, &bytes_read);
 	if(program == NULL) {
-		printf("Could not load the program from %s\n", argv[1]);
+		printf("Could not load the program from %s\n", fname);
 		exit(1);
 	}
 
@@ -127,6 +122,14 @@ int main(int argc, char** argv) {
 
 	uchar* mem_ptr = memory;
 	process_program(program, bytes_read, memory, &mem_ptr);
+}
 
+int main(int argc, char** argv) {
+	if(argc != 2) {
+		printf("Usage: %s <filename>\n", argv[0]);
+		exit(1);
+	}
+
+	run_from_file(argv[1]);
 	return 0;
 }
