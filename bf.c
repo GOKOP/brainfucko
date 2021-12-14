@@ -154,8 +154,11 @@ void repl() {
 	while(true) {
 		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
 		getline(&linebuf, &bufsize, stdin);
+		if(strcmp(linebuf, ":q\n") == 0) break;
 		process_program(linebuf, memory, &mem_ptr, true);
 	}
+	free(linebuf);
+	free(memory);
 }
 
 int main(int argc, char** argv) {
