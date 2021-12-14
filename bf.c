@@ -124,12 +124,32 @@ void run_from_file(char* fname) {
 	process_program(program, bytes_read, memory, &mem_ptr);
 }
 
+void repl() {
+	uchar* memory = malloc(MEMSIZE * sizeof(uchar));
+	if(!memory) {
+		printf("Can't allocate program memory\n");
+		exit(1);
+	}
+
+	uchar* mem_ptr = memory;
+
+	char* linebuf = NULL;
+	size_t bufsize = 0;
+
+	while(1) {
+		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
+		getline(&linebuf, &bufsize, stdin);
+		process_program(linebuf, strlen(linebuf), memory, &mem_ptr);
+	}
+}
+
 int main(int argc, char** argv) {
 	if(argc != 2) {
 		printf("Usage: %s <filename>\n", argv[0]);
 		exit(1);
 	}
 
-	run_from_file(argv[1]);
+	if(strcmp(argv[1], "--repl") == 0) repl();
+	else run_from_file(argv[1]);
 	return 0;
 }
