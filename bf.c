@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "stack.h"
 
 #define READ_CHUNK 100
@@ -70,9 +71,12 @@ void decr_ptr(uchar* beg, uchar** ptr) {
 	}
 }
 
-void process_program(char* program, uchar* memory, uchar** mem_ptr) {
+// note that if newline is true then this function will print a newline at the end
+// if the brainfuck program prints anything but not otherwise
+void process_program(char* program, uchar* memory, uchar** mem_ptr, bool newline) {
 	stack_el* loops = NULL;
 	char* prog_ptr = program;
+	bool prints = false; // whether or not there were prints
 
 	while(*prog_ptr) {
 		switch(*prog_ptr) {
@@ -85,7 +89,9 @@ void process_program(char* program, uchar* memory, uchar** mem_ptr) {
 			case '-': 
 				--(**mem_ptr); break;
 			case '.': 
-				putchar(**mem_ptr); break;
+				putchar(**mem_ptr); 
+				prints = true;
+				break;
 			case ',': 
 				**mem_ptr = getchar(); break;
 			case '[':
@@ -103,6 +109,8 @@ void process_program(char* program, uchar* memory, uchar** mem_ptr) {
 		}
 		++prog_ptr;
 	}
+
+	if(newline && prints) printf("\n");
 }
 
 void run_from_file(char* fname) {
@@ -120,7 +128,7 @@ void run_from_file(char* fname) {
 	memset(memory, 0, MEMSIZE);
 
 	uchar* mem_ptr = memory;
-	process_program(program, memory, &mem_ptr);
+	process_program(program, memory, &mem_ptr, false);
 }
 
 void repl() {
@@ -135,10 +143,10 @@ void repl() {
 	char* linebuf = NULL;
 	size_t bufsize = 0;
 
-	while(1) {
+	while(true) {
 		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
 		getline(&linebuf, &bufsize, stdin);
-		process_program(linebuf, memory, &mem_ptr);
+		process_program(linebuf, memory, &mem_ptr, true);
 	}
 }
 
