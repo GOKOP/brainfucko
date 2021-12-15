@@ -1,2 +1,2 @@
 compile:
-	gcc *.c -Wall -Wextra -o bf
+	gcc src/*.c -Isrc -Wall -Wextra -o brainfucko
