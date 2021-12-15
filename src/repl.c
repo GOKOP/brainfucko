@@ -5,11 +5,19 @@
 #include <stdio.h>
 #include <string.h>
 
+void print_help() {
+	printf("Special commands:\n");
+	printf(":q - quit\n");
+	printf(":h - help\n");
+}
+
 // 0 if not a special command
 int process_commands(const char* input, bool* running) {
 	if(input[0] != ':') return 0;
 
 	if(strcmp(input, ":q\n") == 0) *running = false;
+	else if(strcmp(input, ":h\n") == 0) print_help();
+
 	return 1;
 }
 
@@ -26,6 +34,8 @@ void repl(int mem_size) {
 	size_t bufsize = 0;
 	char* err = NULL;
 	bool running = true;
+
+	printf(":q to quit, :h for help\n");
 
 	while(running) {
 		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
