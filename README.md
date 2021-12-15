@@ -19,7 +19,7 @@ make
 ./brainfucko <filename>
 ```
 
-The examples directory contains program I've used to test if the interpreter works.
+The examples directory contains programs I've used to test if the interpreter works.
 
 Exit codes:
 
