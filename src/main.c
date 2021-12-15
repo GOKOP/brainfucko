@@ -49,7 +49,16 @@ void run_from_file(char* fname) {
 	memset(memory, 0, MEMSIZE);
 
 	uchar* mem_ptr = memory;
-	int ret = process_program(program, memory, &mem_ptr, MEMSIZE, false);
+	char* err = NULL;
+
+	int ret = process_program(program, memory, &mem_ptr, MEMSIZE, &err, false);
+
+	if(err) {
+		printf("%s\n", err);
+		free(err);
+		err = NULL;
+	}
+
 	if(ret > 0) exit(ret);
 }
 
@@ -64,12 +73,19 @@ void repl() {
 
 	char* linebuf = NULL;
 	size_t bufsize = 0;
+	char* err = NULL;
 
 	while(true) {
 		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
 		getline(&linebuf, &bufsize, stdin);
 		if(strcmp(linebuf, ":q\n") == 0) break;
-		process_program(linebuf, memory, &mem_ptr, MEMSIZE, true);
+		process_program(linebuf, memory, &mem_ptr, MEMSIZE, &err, true);
+
+		if(err) {
+			printf("%s\n", err);
+			free(err);
+			err = NULL;
+		}
 	}
 	free(linebuf);
 	free(memory);
