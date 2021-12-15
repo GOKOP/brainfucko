@@ -19,6 +19,8 @@ make
 ./brainfucko <filename>
 ```
 
+The examples directory contains program I've used to test if the interpreter works.
+
 Exit codes:
 
 - 0 – success
