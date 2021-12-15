@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "interpreter.h"
+#include "repl.h"
 
 #define READ_CHUNK 100
 #define MEMSIZE 30000
@@ -62,42 +63,13 @@ void run_from_file(char* fname) {
 	if(ret > 0) exit(ret);
 }
 
-void repl() {
-	uchar* memory = malloc(MEMSIZE * sizeof(uchar));
-	if(!memory) {
-		printf("Can't allocate program memory\n");
-		exit(1);
-	}
-
-	uchar* mem_ptr = memory;
-
-	char* linebuf = NULL;
-	size_t bufsize = 0;
-	char* err = NULL;
-
-	while(true) {
-		printf("%li: %i> ", mem_ptr - memory, *mem_ptr);
-		getline(&linebuf, &bufsize, stdin);
-		if(strcmp(linebuf, ":q\n") == 0) break;
-		process_program(linebuf, memory, &mem_ptr, MEMSIZE, &err, true);
-
-		if(err) {
-			printf("%s\n", err);
-			free(err);
-			err = NULL;
-		}
-	}
-	free(linebuf);
-	free(memory);
-}
-
 int main(int argc, char** argv) {
 	if(argc != 2) {
 		printf("Usage: %s <filename>\n", argv[0]);
 		exit(1);
 	}
 
-	if(strcmp(argv[1], "--repl") == 0) repl();
+	if(strcmp(argv[1], "--repl") == 0) repl(MEMSIZE);
 	else run_from_file(argv[1]);
 	return 0;
 }
