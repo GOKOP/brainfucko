@@ -88,6 +88,11 @@ int process_program(char* program, uchar* memory, uchar** mem_ptr, int mem_size,
 		++prog_ptr;
 	}
 
+	if(loops) {
+		seterr(err, "ERROR: Bad Syntax: '[' without matching ']'");
+		return 2;
+	}
+
 	if(newline && prints) printf("\n");
 	return 0;
 }
